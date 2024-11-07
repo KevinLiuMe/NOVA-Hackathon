@@ -1,5 +1,7 @@
 To run:
 
+run npm install to get node_modules folder 
+
 cd into server command: node index.js open new terminal cd into root file command: npm start
 
 make sure to fill in the
