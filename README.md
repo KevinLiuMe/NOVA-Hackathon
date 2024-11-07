@@ -4,7 +4,9 @@ cd into server command: node index.js open new terminal cd into root file comman
 
 make sure to fill in the
 
-ALPHA_VANTAGE_API_KEY= OPENAI_API_KEY= (.env file in server)
+ALPHA_VANTAGE_API_KEY= 
+OPENAI_API_KEY= 
+( create .env file in server folder first )
 
 with your own key google how to get them should be free
 
