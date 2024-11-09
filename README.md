@@ -4,23 +4,23 @@ cd into root file **Nova**, then run `npm install` to get node_modules folder
 
 cd into **server**, then run `node index.js`
 
-If any modules are missing, run `npm install {module}` where the module is the missing module
-If the terminal throws an error about API key missing after running `node index.js`, we will fix that in the next step.
+If any modules are missing, run `npm install {module}` where the module is the missing module.  
+If the terminal throws an error about API key missing after running `node index.js`, we will fix that in the next step.  
 If the terminal asks you to pip install, follow the terminal and run the command provided (e.g. `pip install backtrader yfinance pandas`)
 
-Inside the **server** folder, create a **.env** file
-in your new .env file, make sure to fill in the following information: 
-\\
-ALPHA_VANTAGE_API_KEY={ key }
-OPENAI_API_KEY={ key }
-\\
-The keys should be free to get.
-Get the Alpha Vantage key from here: https://www.alphavantage.co/support/#api-key
-Get the OpenAI key from here: https://platform.openai.com/api-keys
-These keys will allow you to interact with the LLM. 
+Inside the **server** folder, create a **.env** file  
+In your new .env file, make sure to fill in the following information:  
+\\  
+ALPHA_VANTAGE_API_KEY={ key }  
+OPENAI_API_KEY={ key }  
+\\  
+The keys should be free to get.  
+Get the Alpha Vantage key from here: https://www.alphavantage.co/support/#api-key  
+Get the OpenAI key from here: https://platform.openai.com/api-keys  
+These keys will allow you to interact with the LLM.
 
-After adding the keys, open a new terminal, cd into root file **Nova**, then run `npm start` concurrently with `node index.js`
-running this command will open a tab in your browser that shows the LLM interface.
+After adding the keys, open a new terminal, cd into root file **Nova**, then run `npm start` concurrently with `node index.js`.  
+Running this command will open a tab in your browser that shows the LLM interface.
 
 Now you can interact with it :)
 
