@@ -10,9 +10,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "backtrader": "^0.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "openai": "^4.69.0"
+    "lucide-react": "^0.456.0",
+    "openai": "^4.69.0",
+    "pandas": "^0.0.3",
+    "yfinance": "^0.0.6"
   }
 }

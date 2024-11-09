@@ -10,7 +10,8 @@ app.use(cors());
 app.use(express.json());
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.PROXY_ENDPOINT,
 });
 
 const strategyPrompt = `You are a Python trading strategy developer. Create a complete Backtrader strategy class that implements the following requirements:
@@ -126,7 +127,9 @@ const cleanPythonCode = (code) => {
   // Fix any mangled init methods
   code = code.replace(/def \*\*init\*\*/g, 'def __init__')
            .replace(/def init/g, 'def __init__');
-  
+
+  code = code.replace(/^(Here|This code|Let me know|Sure,|In this example|Certainly,).*\n?/gm, '');
+  code = code.replace(/\n?(This|Please note|The strategy|The above).*\n?$/gm, '').trim();
   return code;
 };
 
@@ -210,7 +213,7 @@ app.post('/generate-code', async (req, res) => {
         max_tokens: 1500,
         temperature: 0.7
       });
-      
+
       let strategyCode = cleanPythonCode(strategyCompletion.choices[0].message.content);
       
       if (!validateStrategyCode(strategyCode)) {
@@ -333,7 +336,7 @@ app.listen(port, () => {
   exec('python3 -c "import backtrader, yfinance, pandas"', (error) => {
     if (error) {
       console.error("Warning: Required Python packages may not be installed.");
-      console.log("Please run: pip install backtrader yfinance pandas");
+      console.log("Please run in your Python environment: pip install backtrader yfinance pandas");
     } else {
       console.log("Required Python packages are installed");
     }

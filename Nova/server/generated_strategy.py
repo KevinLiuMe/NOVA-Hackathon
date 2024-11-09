@@ -4,13 +4,32 @@ import pandas as pd
 
 class TradingStrategy(bt.Strategy):
     params = (
-        ('period', 20),
+        ('ma_period', 20),
         ('risk_pct', 0.02),
         ('stop_loss', 0.02),
     )
 
     def __init__(self):
-        self.rsi = bt.indicators.RSI_SMA(self.data.close, period=self.params.period)
+        self.ma = bt.indicators.SimpleMovingAverage(self.data.close, period=self.params.ma_period)
+        self.order = None
+        self.price = None
+
+    def log(self, txt, dt=None):
+        dt = dt or self.datas[0].datetime.date(0)
+        print(f'{dt.isoformat()}, {txt}')
+
+    def notify_order(self, order):
+        if order.status in [order.Submitted, order.Accepted]:
+            return
+        if order.status in [order.Completed]:
+            if order.isbuy():
+                self.log(f'BUY EXECUTED, {order.executed.price:.2f}')
+                self.price = order.executed.price
+            elif order.issell():
+                self.log(f'SELL EXECUTED, {order.executed.price:.2f}')
+                self.price = None
+        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
+            self.log('Order Canceled/Margin/Rejected')
         self.order = None
 
     def next(self):
@@ -18,27 +37,13 @@ class TradingStrategy(bt.Strategy):
             return
 
         if not self.position:
-            if self.rsi < 30:
-                amount_to_invest = (self.params.risk_pct * self.broker.get_cash())
-                self.size = amount_to_invest / self.data.close[0]
-                self.order = self.buy(size=self.size)
+            if self.data.close[0] < self.ma[0]:
+                size = self.broker.getcash() * self.params.risk_pct
+                size /= self.data.close[0]
+                self.order = self.buy(size=size)
         else:
-            if self.rsi > 70:
-                self.order = self.close()
-            elif self.data.close[0] < (1 - self.params.stop_loss) * self.order.executed.price:
-                self.order = self.close()
+            if self.data.close[0] > self.ma[0]:
+                self.order = self.sell(size=self.position.size)
 
-    def notify_order(self, order):
-        if order.status in [order.Submitted, order.Accepted]:
-            return
-
-        if order.status in [order.Completed]:
-            if order.isbuy():
-                self.log('Buy executed at %.2f' % order.executed.price)
-            elif order.issell():
-                self.log('Sell executed at %.2f' % order.executed.price)
-
-        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
-
-        self.order = None
+            if self.data.close[0] < self.price * (1 - self.params.stop_loss):
+                self.order = self.sell(size=self.position.size)

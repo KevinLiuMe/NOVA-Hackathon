@@ -173,10 +173,10 @@ const AnalysisDashboard = ({ analysis }) => {
     ];
 
     return (
-        <div className="p-4 bg-[#1a2b22] rounded-lg animate-fadeIn">
-            <h2 className="text-xl font-bold mb-4 text-[#e1e6e3]">
+        <div className="p-1 bg-[#1a2b22] rounded-lg animate-fadeIn">
+            {/* <h2 className="text-xl font-bold mb-4 text-[#e1e6e3]">
                 Strategy Analysis
-            </h2>
+            </h2> */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {metrics.map((metric, index) => (
                     <MetricCard
@@ -197,7 +197,7 @@ const SplitScreenApp = () => {
     const [messages, setMessages] = useState([
         {
             type: "ai",
-            text: "Hello! I'm Nova, your AI trading assistant. How can I help you today?",
+            text: "Hello! I'm Nova, your AI trading assistant. How can I help you today?\n\nAn example prompt:\nI would like a strategy to buy in if the current price is lower than yesterday's lowest price and sell if the current price is higher than yesterday's highest price.",
         },
     ]);
     const [inputMessage, setInputMessage] = useState("");
@@ -207,6 +207,7 @@ const SplitScreenApp = () => {
     const [showCodeEditor, setShowCodeEditor] = useState(false);
     const [lastError, setLastError] = useState(null);
     const chatEndRef = useRef(null);
+    const [showStrategyDashboard, setShowStrategyDashboard] = useState(false);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -219,7 +220,7 @@ const SplitScreenApp = () => {
             ...prevMessages,
             {
                 type: "ai",
-                text: "I'll try to fix the code. Analyzing the error...",
+                text: "Working hard on your code...",
             },
         ]);
 
@@ -274,7 +275,7 @@ const SplitScreenApp = () => {
         }
     };
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (inputMessage.trim() === "") return;
 
         const newMessages = [
@@ -284,7 +285,20 @@ const SplitScreenApp = () => {
         ];
         setMessages(newMessages);
         setInputMessage("");
-        fetchCode(inputMessage);
+        // fetchCode(inputMessage);
+
+        try {
+            await fetchCode(inputMessage);
+        } catch (error) {
+            console.error("Error fetching response:", error);
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    type: "ai",
+                    text: "Sorry, I encountered an error generating the code. Please try again.",
+                },
+            ]);
+        }
     };
 
     const handleCodeUpdate = async (newCode) => {
@@ -464,18 +478,14 @@ class TradingStrategy(bt.Strategy):
     };
 
     return (
-        <div className="relative min-h-screen">
+        <div className="relative h-screen flex flex-col">
             <div className="absolute inset-0 bg-[#1a2b22] -z-10" />
             {!showCodeEditor && <FloatingCircles />}
-            <div className="relative z-10 flex min-h-screen">
+            <div className="relative z-10 flex flex-1 overflow-y-auto">
                 <div
-                    className={`${
-                        showCodeEditor
-                            ? "w-1/2 border-r border-[#40675f]"
-                            : "w-[60%] mx-auto"
-                    } transition-all duration-300 ease-in-out min-h-screen flex flex-col`}
+                    className={`w-full transition-all duration-300 ease-in-out flex flex-col`}
                 >
-                    <div className="flex-1 flex flex-col space-y-4 p-4">
+                    <div className="flex-1 flex flex-col space-y-4 p-4 overflow-y-auto">
                         <div className="flex-1 overflow-y-auto space-y-4">
                             {console.log("Message: ", messages)}
                             {messages.map((msg, index) => (
@@ -559,63 +569,92 @@ class TradingStrategy(bt.Strategy):
                 </div>
 
                 {showCodeEditor && (
-                    <div className="w-1/2 min-h-screen flex flex-col animate-slideIn">
-                        <div className="flex-1 p-4">
-                            <div className="bg-[#2a3f35] rounded-2xl h-full overflow-hidden flex flex-col">
-                                <>
-                                    <div className="p-4">
-                                        <AnalysisDashboard
-                                            analysis={analysisResults}
-                                        />
-                                    </div>
-                                    <div className="p-4 border-b border-[#40675f] flex justify-between items-center">
-                                        <select
-                                            value={language}
-                                            onChange={(e) =>
-                                                setLanguage(e.target.value)
-                                            }
-                                            className="bg-[#1a2b22] text-[#e1e6e3] px-3 py-1 rounded-lg focus:outline-none"
-                                        >
-                                            <option value="python">
-                                                Python
-                                            </option>
-                                            <option value="javascript">
-                                                JavaScript
-                                            </option>
-                                        </select>
-                                        <div className="flex space-x-2">
+                    <div className="w-full flex flex-col animate-slideIn">
+                        <div className="flex-1 p-4 overflow-hidden">
+                            <div className="bg-[#2a3f35] rounded-2xl h-full overflow-y-auto flex flex-col">
+                                {analysisResults && (
+                                    <>
+                                        <div className="p-4 border-b border-[#40675f] flex justify-between items-center">
+                                            <span className="text-lg font-bold text-[#e1e6e3]">
+                                                Strategy Dashboard
+                                            </span>
                                             <button
-                                                onClick={copyCode}
-                                                className="hover:bg-[#40675f] p-1 rounded text-[#e1e6e3] focus:outline-none focus:ring-2 focus:ring-[#40675f]"
-                                                title="Copy code"
+                                                onClick={() =>
+                                                    setShowStrategyDashboard(
+                                                        !showStrategyDashboard
+                                                    )
+                                                }
+                                                className="hover:bg-[#40675f] p-2 rounded text-[#e1e6e3] focus:outline-none focus:ring-2 focus:ring-[#40675f]"
+                                                title={
+                                                    showStrategyDashboard
+                                                        ? "Minimize Dashboard"
+                                                        : "Show Dashboard"
+                                                }
                                             >
-                                                <Copy size={20} />
-                                            </button>
-                                            <button
-                                                onClick={clearCode}
-                                                className="hover:bg-[#40675f] p-1 rounded text-[#e1e6e3] focus:outline-none focus:ring-2 focus:ring-[#40675f]"
-                                                title="Clear code"
-                                            >
-                                                <Trash2 size={20} />
-                                            </button>
-                                            <button
-                                                onClick={handleConfirmCode}
-                                                className="hover:bg-[#40675f] p-1 rounded text-[#e1e6e3] focus:outline-none focus:ring-2 focus:ring-[#40675f]"
-                                                title="Run strategy"
-                                            >
-                                                <Send size={20} />
+                                                {showStrategyDashboard ? (
+                                                    <Trash2 size={20} />
+                                                ) : (
+                                                    <TrendingUp size={20} />
+                                                )}
                                             </button>
                                         </div>
+                                        <div
+                                            className={`flex-1 overflow-hidden bg-[#1a2b22] p-4 ${
+                                                showStrategyDashboard
+                                                    ? "block"
+                                                    : "hidden"
+                                            }`}
+                                        >
+                                            <AnalysisDashboard
+                                                analysis={analysisResults}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                <div className="p-4 border-b border-[#40675f] flex justify-between items-center">
+                                    <select
+                                        value={language}
+                                        onChange={(e) =>
+                                            setLanguage(e.target.value)
+                                        }
+                                        className="bg-[#1a2b22] text-[#e1e6e3] px-3 py-1 rounded-lg focus:outline-none"
+                                    >
+                                        <option value="python">Python</option>
+                                        <option value="javascript">
+                                            JavaScript
+                                        </option>
+                                    </select>
+                                    <div className="flex space-x-2">
+                                        <button
+                                            onClick={copyCode}
+                                            className="hover:bg-[#40675f] p-1 rounded text-[#e1e6e3] focus:outline-none focus:ring-2 focus:ring-[#40675f]"
+                                            title="Copy code"
+                                        >
+                                            <Copy size={20} />
+                                        </button>
+                                        <button
+                                            onClick={clearCode}
+                                            className="hover:bg-[#40675f] p-1 rounded text-[#e1e6e3] focus:outline-none focus:ring-2 focus:ring-[#40675f]"
+                                            title="Clear code"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                        <button
+                                            onClick={handleConfirmCode}
+                                            className="hover:bg-[#40675f] p-1 rounded text-[#e1e6e3] focus:outline-none focus:ring-2 focus:ring-[#40675f]"
+                                            title="Run strategy"
+                                        >
+                                            <Send size={20} />
+                                        </button>
                                     </div>
-                                    <div className="flex-1 overflow-auto bg-[#1a2b22] p-4">
-                                        <CodeEditor
-                                            value={code}
-                                            onChange={setCode}
-                                            language={language}
-                                        />
-                                    </div>
-                                </>
-                                )
+                                </div>
+                                <div className="flex-1 overflow-y-auto bg-[#1a2b22] p-4">
+                                    <CodeEditor
+                                        value={code}
+                                        onChange={setCode}
+                                        language={language}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
