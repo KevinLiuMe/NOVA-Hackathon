@@ -197,7 +197,7 @@ const SplitScreenApp = () => {
     const [messages, setMessages] = useState([
         {
             type: "ai",
-            text: "Hello! I'm Nova, your AI trading assistant. How can I help you today?\n\nAn example prompt:\nI would like a strategy to buy in if the current price is lower than yesterday's lowest price and sell if the current price is higher than yesterday's highest price.",
+            text: "Hello! I'm Nova, your AI trading assistant. How can I help you today?\nThis strategy runs on a 5 minute interval for the last 60 days.\n\nAn example prompt:\nI would like a strategy to buy in if the current price is lower than yesterday's lowest price and sell if the current price is higher than yesterday's highest price.",
         },
     ]);
     const [inputMessage, setInputMessage] = useState("");
