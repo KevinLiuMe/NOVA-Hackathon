@@ -129,7 +129,7 @@ const cleanPythonCode = (code) => {
            .replace(/def init/g, 'def __init__');
 
   code = code.replace(/^(Here|This code|Let me know|Sure,|In this example|Certainly,).*\n?/gm, '');
-  code = code.replace(/\n?(This|Please note|The strategy|The above).*\n?$/gm, '').trim();
+  code = code.replace(/\n?(This strategy|Please note|The strategy|The above|In this|This above).*\n?$/gm, '').trim();
   return code;
 };
 
